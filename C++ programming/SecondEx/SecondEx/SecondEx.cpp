@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <iostream>
 
+
 enum TypeOfAccount
 {
 	Paying = 1,
@@ -41,6 +42,7 @@ public:
 	int AddSumToAccount(double sum, string IBAN);
 	double GetTotalSum();
 	void PrintClientData();
+	int GetClientNumber();
 };
 
 int ClientBank::AddAccount(Account account)
@@ -73,6 +75,8 @@ int ClientBank::RemoveAccount(string IBAN)
 		{
 			this->account[i] = this->account[i + 1];
 		}
+		countOfAccounts--;
+		return 1;
 	}
 	else
 	{
@@ -138,39 +142,109 @@ void ClientBank::PrintClientData()
 	}
 }
 
+int ClientBank::GetClientNumber() {
+	return this->clientNumber;
+}
+
+class Bank {
+	ClientBank* Table;
+	int tableEnd;
+	int tableSize;
+public:
+	Bank()
+	{
+		tableEnd = 0;
+		tableSize = 1;
+		Table = (ClientBank*)malloc(sizeof(ClientBank) * tableSize);
+	}
+	Bank(int size)
+	{
+		tableEnd = 0;
+		tableSize = size;
+		Table = (ClientBank*)malloc(sizeof(ClientBank) * tableSize);
+	}
+	~Bank()
+	{
+		free(Table);
+	}
+	int AddClient(ClientBank* client);
+	int RemoveClient(int clientNumber);
+	void PrintClients();
+};
+
+int Bank::AddClient(ClientBank* client)
+{
+	if (tableEnd == tableSize)
+	{
+		ClientBank* table;
+		tableSize *= 2;
+		table = Table;
+		Table = (ClientBank*)malloc(sizeof(ClientBank) * tableSize);
+		memcpy(Table, table, sizeof(ClientBank) * tableSize / 2);
+		free(table);
+	}
+	memcpy(&Table[tableEnd], client, sizeof(ClientBank));
+	tableEnd++;
+	return 1;
+}
+
+int Bank::RemoveClient(int clientNumber)
+{
+	int i;
+	for (i = 0; i < tableEnd; i++)
+	{
+		if (Table[i].GetClientNumber() == clientNumber)
+		{
+			break;
+		}
+	}
+	if (i < tableEnd)
+	{
+		for (; i < tableEnd - 1; i++)
+		{
+			Table[i] = Table[i + 1];
+		}
+		tableEnd--;
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void Bank::PrintClients()
+{
+	for (int i = 0; i < tableEnd; i++)
+	{
+		Table[i].PrintClientData();
+	}
+}
+
+
+
 int main()
 {
-	ClientBank Clients[2];
-	char fname[] = "Ivan";
-	char lname[] = "Petrov";
-	char IBAN1[] = "SB172ZBN010E651";
-	char IBAN2[] = "SB172ZBN010E65111";
-	Clients[0] = ClientBank(fname, lname, 1);
-	char fsname[] = "Peter";
-	char lsname[] = "Parker";
-	Clients[1] = ClientBank(fsname, lsname, 2);
-	Account cl1;
-	cl1.type = Paying;
-	strcpy_s(cl1.IBAN, IBAN1);
-	cl1.current = 100;
+	Bank bank(2);
+	char name[20] = "Kircho";
+	char family[30] = "Popovski";
+	char iban[23] = "Test";
+	for (int i = 0; i < 6; i++)
+	{
+		Account account;
+		account.type = Paying;
+		strcpy_s(account.IBAN, iban);
+		account.current = 250 + i;
+		ClientBank client = ClientBank(name, family, i);
+		client.AddAccount(account);
+		bank.AddClient(&client);
+	}
+	int result = bank.RemoveClient(3);
+	cout << result << endl;
+	bank.PrintClients();
+	bank.~Bank();
+	return 0;
 
-	Clients[0].AddAccount(cl1);
-
-	Account cl2;
-	cl2.type = Debit;
-	strcpy_s(cl2.IBAN, IBAN2);
-	cl2.current = 1000;
-	Clients[1].AddAccount(cl2);
-
-	int x = Clients[0].AddSumToAccount(200, "SB172ZBN010E651");
-	int y = Clients[1].AddSumToAccount(400, "SB172ZBN010E65111");
-	
-	Clients[0].PrintClientData();
-	Clients[1].PrintClientData();
-
-
-	//TODO add private method GenerateIBAN
-	//TODO add method to generate Accounts
-	//TODO remove this everywhere
+	//TODO add method for random char[] generation
 }
 

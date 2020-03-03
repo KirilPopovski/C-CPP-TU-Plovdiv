@@ -28,10 +28,11 @@ int Bank::AddClient(ClientBank* client)
 	if (tableEnd == tableSize)
 	{
 		ClientBank* table;
+		int tmp = tableSize;
 		tableSize = FNumber.Get();
 		table = Table;
 		Table = (ClientBank*)malloc(sizeof(ClientBank) * tableSize);
-		memcpy(Table, table, sizeof(ClientBank) * tableSize / 2);
+		memcpy(Table, table, sizeof(ClientBank) * tmp);
 		free(table);
 	}
 	memcpy(&Table[tableEnd], client, sizeof(ClientBank));

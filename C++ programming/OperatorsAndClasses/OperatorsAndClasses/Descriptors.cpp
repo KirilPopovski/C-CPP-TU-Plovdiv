@@ -26,7 +26,7 @@ int Descriptors::Delete(string identifier)
 	int index = -1;
 	for (int i = 0; i < number; i++)
 	{
-		if (this->table->GetIdentifier() == identifier)
+		if (this->table[i].GetIdentifier() == identifier)
 		{
 			index = i;
 			break;
